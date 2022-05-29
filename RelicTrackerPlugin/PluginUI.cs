@@ -34,17 +34,20 @@ class PluginUI : IDisposable
     }
 
     private readonly ItemFinder itemFinder;
+    private readonly QuestFinder questFinder;
     private readonly ClientState clientState;
 
-    private string[] inventoryIDs = new string[0];
+    private string[] inventoryIDs = Array.Empty<string>();
+    private Models.Item[] items = Array.Empty<Models.Item>();
 
     private WeaponCategory selectedWeaponCategory;
     private WeaponJob selectedJob;
 
-    public PluginUI(Configuration configuration, ItemFinder itemFinder, ClientState clientState)
+    public PluginUI(Configuration configuration, ItemFinder itemFinder, QuestFinder questFinder, ClientState clientState)
     {
         this.configuration = configuration;
         this.itemFinder = itemFinder;
+        this.questFinder = questFinder;
         this.clientState = clientState;
         selectedJob = EnumHelper.GetWeaponJob(clientState.LocalPlayer?.ClassJob.GetWithLanguage(clientState.ClientLanguage));
     }
@@ -87,7 +90,7 @@ class PluginUI : IDisposable
                 IEnumerable<WeaponCategory> weaponCategories = EnumHelper.GetAllValues<WeaponCategory>();
                 foreach (WeaponCategory weaponCategory in weaponCategories)
                 {
-                    if (ImGui.BeginTabItem($"{EnumHelper.GetAttribute<WeaponCategoryNameAttribute>(weaponCategory)}(0/{EnumHelper.GetAttribute<JobsAttribute>(weaponCategory)?.Values.Length})"))
+                    if (ImGui.BeginTabItem($"{EnumHelper.GetAttribute<WeaponCategoryNameAttribute>(weaponCategory)}(0/{EnumHelper.GetAttribute<WeaponCategoryJobsAttribute>(weaponCategory)?.Values.Length})"))
                     {
                         selectedWeaponCategory = weaponCategory;
                         ImGui.EndTabItem();
@@ -166,11 +169,15 @@ class PluginUI : IDisposable
         {
             ImGui.Text("Bla");
         }
+        foreach (var item in items)
+        {
+            ImGui.Text($"{item.Name} x{item.Quantity}");
+        }
         ImGui.EndChild();
 
         if (ImGui.Button("Scan Inventory"))
         {
-            itemFinder.ScanInventory();
+            items = itemFinder.ScanInventory();
         }
     }
 
@@ -179,7 +186,7 @@ class PluginUI : IDisposable
         if (ImGui.BeginTable("zodiacJobs", 11))
         {
             ImGui.TableNextRow();
-            WeaponJob[] zodiacWeaponJobs = EnumHelper.GetAttribute<JobsAttribute>(selectedWeaponCategory)?.Values ?? Array.Empty<WeaponJob>();
+            WeaponJob[] zodiacWeaponJobs = EnumHelper.GetAttribute<WeaponCategoryJobsAttribute>(selectedWeaponCategory)?.Values ?? Array.Empty<WeaponJob>();
             for (int i = 0; i < zodiacWeaponJobs.Length; i++)
             {
                 ImGui.TableSetColumnIndex(i);
@@ -194,38 +201,43 @@ class PluginUI : IDisposable
         ImGui.BeginChild("scrolling", new Vector2(0, 400), true, ImGuiWindowFlags.HorizontalScrollbar);
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, 5));
 
-        if (ImGui.CollapsingHeader("Step 1: Relic"))
+        WeaponStep[] weaponSteps = EnumHelper.GetAttribute<WeaponCategoryStepsAttribute>(selectedWeaponCategory)?.Values ?? Array.Empty<WeaponStep>();
+        for (int i = 0; i < weaponSteps.Length; i++)
         {
-            ImGui.Text("Test");
-        }
-        if (ImGui.CollapsingHeader("Step 2: Zenith"))
-        {
+            if (ImGui.CollapsingHeader($"Step {i + 1}: {EnumHelper.GetAttribute<WeaponStepNameAttribute>(weaponSteps[i])?.Value ?? "Unknown"}"))
+            {
+                ImGui.BeginChild("relicQuests", new Vector2(0, 200), true, ImGuiWindowFlags.None);
 
-        }
-        if (ImGui.CollapsingHeader("Step 3: Atma"))
-        {
+                WeaponQuest[] relicQuests = EnumHelper.GetAttribute<WeaponStepQuestsAttribute>(WeaponStep.Relic)?.Values ?? Array.Empty<WeaponQuest>();
 
-        }
-        if (ImGui.CollapsingHeader("Step 4: Animus"))
-        {
+                for (int j = 0; j < relicQuests.Length; j++)
+                {
+                    WeaponQuestAttribute? weaponQuest = EnumHelper.GetAttribute<WeaponQuestAttribute>(relicQuests[j]);
+                    ImGui.PushStyleColor(ImGuiCol.Header, 0xFFFF0000);
+                    if (ImGui.CollapsingHeader($"{GetWeaponQuest(weaponQuest, selectedJob)}"))
+                    {
 
-        }
-        if (ImGui.CollapsingHeader("Step 5: Novus"))
-        {
+                    }
+                    ImGui.PopStyleColor(1);
+                }
 
-        }
-        if (ImGui.CollapsingHeader("Step 6: Nexus"))
-        {
-
-        }
-        if (ImGui.CollapsingHeader("Step 7: Zodiac"))
-        {
-
-        }
-        if (ImGui.CollapsingHeader("Step 8: Zeta"))
-        {
-
+                ImGui.EndChild();
+            }
         }
         ImGui.EndChild();
+    }
+
+    private string GetWeaponQuest(WeaponQuestAttribute? weaponQuestAttribute, WeaponJob weaponJob)
+    {
+        if (weaponQuestAttribute == null)
+        {
+            return string.Empty;
+        }
+        return weaponQuestAttribute.QuestType switch
+        {
+            WeaponQuestType.OneTime => questFinder.GetQuest(weaponQuestAttribute.Values[0])?.Name ?? string.Empty,
+            WeaponQuestType.JobSpecific => questFinder.GetQuest(weaponQuestAttribute.Values[(int)weaponJob])?.Name ?? string.Empty,
+            _ => string.Empty
+        };
     }
 }

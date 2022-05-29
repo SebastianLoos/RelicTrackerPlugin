@@ -3,11 +3,11 @@
 namespace RelicTrackerPlugin.Enums.Attributes;
 
 [AttributeUsage(AttributeTargets.Field)]
-internal class JobsAttribute : Attribute
+internal class WeaponCategoryJobsAttribute : Attribute
 {
-    public WeaponJob[] Values;
+    public WeaponJob[] Values { get; }
 
-    public JobsAttribute(WeaponJob[] values)
+    public WeaponCategoryJobsAttribute(WeaponJob[] values)
     {
         Values = values;
     }

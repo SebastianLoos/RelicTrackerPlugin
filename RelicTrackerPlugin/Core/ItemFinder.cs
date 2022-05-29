@@ -9,7 +9,7 @@ using System.Linq;
 namespace RelicTrackerPlugin.Core;
 internal class ItemFinder
 {
-    private readonly NameFinder nameFinder;
+    private readonly GameDataFinder nameFinder;
     private readonly InventoryItemScanner inventoryItemScanner;
 
     public ItemFinder(DataManager dataManager, ClientState clientState)
@@ -27,9 +27,12 @@ internal class ItemFinder
 
         foreach (InventoryType inventory in invetoriesToScan)
         {
-            items.AddRange(inventoryItemScanner.GetItemIds(inventory).Select(x => new Item()
+            items.AddRange(inventoryItemScanner.GetItems(inventory).GroupBy(x => x.ItemID).Select(x => new Item()
             {
-                Id = x
+                Id = x.Key,
+                InventoryType = inventory,
+                Name = nameFinder.GetItemName(x.Key),
+                Quantity = x.Sum(y => y.Quantity)
             }));
         }
 

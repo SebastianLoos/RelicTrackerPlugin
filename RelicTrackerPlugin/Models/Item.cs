@@ -10,5 +10,9 @@ internal class Item
 {
     public uint Id { get; set; }
 
-    public InventoryType inventoryType { get; set; }
+    public InventoryType InventoryType { get; set; }
+
+    public string Name { get; set; } = string.Empty;
+
+    public long Quantity { get; set; }
 }

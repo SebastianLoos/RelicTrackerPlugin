@@ -1,6 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Game;
 using System;
-using System.Collections.Generic;
 
 namespace RelicTrackerPlugin.Core.Scanners;
 
@@ -29,6 +28,22 @@ internal unsafe class InventoryItemScanner : IDisposable
         }
 
         return itemIds;
+    }
+
+    public InventoryItem[] GetItems(InventoryType inventoryType)
+    {
+        InventoryContainer* inventory1Container = inventoryManager->GetInventoryContainer(inventoryType);
+        InventoryItem* inventoryitem = inventory1Container->Items;
+
+        InventoryItem[] items = new InventoryItem[inventorySize];
+
+        for (int i = 0; i < inventorySize; i++)
+        {
+            items[i] = *inventoryitem;
+            inventoryitem++;
+        }
+
+        return items;
     }
 
     public void Dispose()

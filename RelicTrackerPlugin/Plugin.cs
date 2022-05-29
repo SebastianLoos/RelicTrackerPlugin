@@ -22,6 +22,7 @@ public sealed class Plugin : IDalamudPlugin
     private PluginUI PluginUi { get; init; }
 
     private ItemFinder ItemFinder { get; init; }
+    private QuestFinder QuestFinder { get; init; }
 
     public Plugin(
         [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
@@ -35,11 +36,12 @@ public sealed class Plugin : IDalamudPlugin
         ClientState = clientState;
 
         ItemFinder = new ItemFinder(dataManager, clientState);
+        QuestFinder = new QuestFinder(dataManager, clientState);
 
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Configuration.Initialize(PluginInterface);
 
-        PluginUi = new PluginUI(Configuration, ItemFinder, ClientState);
+        PluginUi = new PluginUI(Configuration, ItemFinder, QuestFinder, ClientState);
 
         CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
         {
