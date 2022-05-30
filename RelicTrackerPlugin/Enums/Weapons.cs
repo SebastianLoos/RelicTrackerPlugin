@@ -16,15 +16,23 @@ internal enum WeaponCategory
 
 internal enum WeaponStep
 {
-    [WeaponStepName("Relic"), WeaponStepQuests(new WeaponQuest[] {WeaponQuest.RelicWeaponsmithLegend, WeaponQuest.RelicRelicReborn})]Relic,
-    [WeaponStepName("Zenith")]Zenith,
-    [WeaponStepName("Atma")]Atma,
+    [WeaponStepName("Relic"), WeaponSubSteps(new WeaponSubStep[] { WeaponSubStep.RelicWeaponsmithLegend, WeaponSubStep.RelicRelicReborn })]Relic,
+    [WeaponStepName("Zenith"), WeaponSubSteps(new WeaponSubStep[] { WeaponSubStep.Zenith })]Zenith,
+    [WeaponStepName("Atma"), WeaponSubSteps(new WeaponSubStep[] { WeaponSubStep.AtmaUpInArms })]Atma,
     [WeaponStepName("Animus")]Animus,
     [WeaponStepName("Novus")]Novus,
     [WeaponStepName("Nexus")]Nexus,
     [WeaponStepName("Zodiac")]Zodiac,
     [WeaponStepName("Zeta")]Zeta,
     [WeaponStepName("Animated")]Animated
+}
+
+internal enum WeaponSubStep
+{
+    [WeaponSubStepQuest(WeaponQuest.RelicWeaponsmithLegend)]RelicWeaponsmithLegend,
+    [WeaponSubStepQuest(WeaponQuest.RelicRelicReborn)]RelicRelicReborn,
+    [WeaponSubStepItems(new WeaponItem[] { WeaponItem.ThavnairianMist }, new int[] { 3 })]Zenith,
+    [WeaponSubStepQuest(WeaponQuest.AtmaUpInArms)]AtmaUpInArms
 }
 
 internal enum WeaponRelic
@@ -50,8 +58,10 @@ internal enum WeaponQuestType
 
 internal enum WeaponQuest
 {
+    Unknown,
     [WeaponQuest(new uint[] { 66241 }, WeaponQuestType.OneTime)]RelicWeaponsmithLegend,
-    [WeaponQuest(new uint[] { 66656, 66656, 66655, 0, 0, 66660, 66663, 0, 0, 66657, 66658, 67115, 0, 0, 66661, 0, 0, 66659, 66662, 0, 0 }, WeaponQuestType.JobSpecific)]RelicRelicReborn
+    [WeaponQuest(new uint[] { 66656, 66656, 66655, 0, 0, 66660, 66663, 0, 0, 66657, 66658, 67115, 0, 0, 66661, 0, 0, 66659, 66662, 0, 0 }, WeaponQuestType.JobSpecific)]RelicRelicReborn,
+    [WeaponQuest(new uint[] { 66971 }, WeaponQuestType.OneTime)] AtmaUpInArms
 }
 
 internal enum WeaponJob

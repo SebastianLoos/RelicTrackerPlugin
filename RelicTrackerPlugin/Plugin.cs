@@ -1,6 +1,7 @@
 ﻿using Dalamud.Data;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.Command;
+using Dalamud.Game.Gui;
 using Dalamud.IoC;
 using Dalamud.Plugin;
 using RelicTrackerPlugin.Config;
@@ -16,32 +17,39 @@ public sealed class Plugin : IDalamudPlugin
 
     private DalamudPluginInterface PluginInterface { get; init; }
     private CommandManager CommandManager { get; init; }
-    private Configuration Configuration { get; init; }
-    private DataManager DataManager { get; init; }
-    private ClientState ClientState { get; init; }
+
+    public Configuration Configuration { get; init; }
+    public DataManager DataManager { get; init; }
+    public ClientState ClientState { get; init; }
     private PluginUI PluginUi { get; init; }
 
-    private ItemFinder ItemFinder { get; init; }
-    private QuestFinder QuestFinder { get; init; }
+    public ChatGui ChatGui { get; init; }
+
+    internal GameDataFinder GameDataFinder { get; init; }
+    internal ItemFinder ItemFinder { get; init; }
+    internal QuestFinder QuestFinder { get; init; }
 
     public Plugin(
         [RequiredVersion("1.0")] DalamudPluginInterface pluginInterface,
         [RequiredVersion("1.0")] CommandManager commandManager,
         [RequiredVersion("1.0")] DataManager dataManager,
+        [RequiredVersion("1.0")] ChatGui chatGui,
         [RequiredVersion("1.0")] ClientState clientState)
     {
         PluginInterface = pluginInterface;
         CommandManager = commandManager;
         DataManager = dataManager;
         ClientState = clientState;
+        ChatGui = chatGui;
 
         ItemFinder = new ItemFinder(dataManager, clientState);
         QuestFinder = new QuestFinder(dataManager, clientState);
+        GameDataFinder = new GameDataFinder(dataManager, clientState.ClientLanguage);
 
         Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
         Configuration.Initialize(PluginInterface);
 
-        PluginUi = new PluginUI(Configuration, ItemFinder, QuestFinder, ClientState);
+        PluginUi = new PluginUI(this);
 
         CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
         {

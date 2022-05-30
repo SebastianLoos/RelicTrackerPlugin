@@ -33,4 +33,9 @@ internal class QuestFinder
             Name = gameDataFinder.GetQuestName(id)
         };
     }
+
+    public Lumina.Excel.GeneratedSheets.Quest? GetRawQuest(uint id)
+    {
+        return gameDataFinder.GetQuest(id);
+    }
 }

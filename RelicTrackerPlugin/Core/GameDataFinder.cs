@@ -21,6 +21,11 @@ internal class GameDataFinder
         return dataManager.GetExcelSheet<Item>(clientLanguage)?.FirstOrDefault(x => x.RowId == itemId)?.Name.RawString ?? string.Empty;
     }
 
+    public Quest? GetQuest(uint questId)
+    {
+        return dataManager.GetExcelSheet<Quest>(clientLanguage)?.FirstOrDefault(x => x.RowId == questId);
+    }
+
     public string GetQuestName(uint questId)
     {
         return dataManager.GetExcelSheet<Quest>(clientLanguage)?.FirstOrDefault(x => x.RowId == questId)?.Name.RawString ?? string.Empty;
