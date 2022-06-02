@@ -10,6 +10,8 @@ public class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 0;
 
+    public List<ConfigurationItem> Items { get; set; } = new();
+
     public List<uint> CompletedQuestIds { get; set; } = new();
 
     public bool SomePropertyToBeSavedAndWithADefault { get; set; } = true;

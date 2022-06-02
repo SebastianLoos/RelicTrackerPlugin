@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.UI.Agent;
+﻿using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using RelicTrackerPlugin.Enums;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using XivCommon;
+using static FFXIVClientStructs.FFXIV.Client.Game.RetainerManager.RetainerList;
 
 namespace RelicTrackerPlugin;
 
@@ -30,6 +32,13 @@ class PluginUI : IDisposable
         set { this.settingsVisible = value; }
     }
 
+    private bool retainerScanActive = false;
+    public bool RetainerScanActive
+    {
+        get { return this.retainerScanActive; }
+        set { this.retainerScanActive = value; }
+    }
+
     private readonly Plugin plugin;
 
     private string[] inventoryIDs = Array.Empty<string>();
@@ -41,11 +50,14 @@ class PluginUI : IDisposable
     private WeaponStep selectedStep;
     private WeaponJob selectedJob;
 
+    private ItemInventory selectedRetainer;
+
     public PluginUI(Plugin plugin)
     {
         this.plugin = plugin;
         commonBase = new();
         selectedJob = EnumHelper.GetWeaponJob(plugin.ClientState.LocalPlayer?.ClassJob.GetWithLanguage(plugin.ClientState.ClientLanguage));
+        selectedRetainer = ItemInventory.Retainer1;
     }
 
     public void Dispose()
@@ -141,6 +153,34 @@ class PluginUI : IDisposable
         ImGui.End();
     }
 
+    public void DrawRetainerScanWindow()
+    {
+        if (!RetainerScanActive)
+        {
+            return;
+        }
+
+        ImGui.SetNextWindowSize(new Vector2(350, 150), ImGuiCond.Always);
+        if (ImGui.Begin("Scan retainer inventories", ref this.retainerScanActive,
+            ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+        {
+            
+        }
+        ImGui.End();
+    }
+
+    private Retainer? GetRetainer(ItemInventory retainer)
+    {
+        unsafe
+        {
+            return retainer switch
+            {
+                ItemInventory.Retainer1 => RetainerManager.Instance()->Retainer.Retainer0,
+                _ => null
+            };
+        }
+    }
+
     private void DrawTabContent(WeaponCategory weaponCategory)
     {
         switch (weaponCategory)
@@ -173,7 +213,13 @@ class PluginUI : IDisposable
 
         if (ImGui.Button("Scan Inventory"))
         {
-            items = plugin.ItemFinder.ScanInventory();
+            items = plugin.ItemFinder.ScanPlayerInventory();
+        }
+
+        if (ImGui.Button("Scan retainers"))
+        {
+            selectedRetainer = ItemInventory.Retainer1;
+            RetainerScanActive = true;
         }
     }
 

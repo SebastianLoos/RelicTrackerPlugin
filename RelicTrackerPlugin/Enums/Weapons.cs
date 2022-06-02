@@ -60,12 +60,13 @@ internal enum WeaponQuest
 {
     Unknown,
     [WeaponQuest(new uint[] { 66241 }, WeaponQuestType.OneTime)]RelicWeaponsmithLegend,
-    [WeaponQuest(new uint[] { 66656, 66656, 66655, 0, 0, 66660, 66663, 0, 0, 66657, 66658, 67115, 0, 0, 66661, 0, 0, 66659, 66662, 0, 0 }, WeaponQuestType.JobSpecific)]RelicRelicReborn,
+    [WeaponQuest(new uint[] { 0, 66656, 66656, 66655, 0, 0, 66660, 66663, 0, 0, 66657, 66658, 67115, 0, 0, 66661, 0, 0, 66659, 66662, 0, 0 }, WeaponQuestType.JobSpecific)]RelicRelicReborn,
     [WeaponQuest(new uint[] { 66971 }, WeaponQuestType.OneTime)] AtmaUpInArms
 }
 
 internal enum WeaponJob
 {
+    UNKNOWN,
     PLD,
     PLD_OH,
     WAR,
@@ -86,6 +87,5 @@ internal enum WeaponJob
     BLM,
     SMN,
     RDM,
-    BLU,
-    UNKNOWN = 255
+    BLU
 }

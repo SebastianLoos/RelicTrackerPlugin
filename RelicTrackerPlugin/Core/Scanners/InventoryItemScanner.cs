@@ -32,8 +32,8 @@ internal unsafe class InventoryItemScanner : IDisposable
 
     public InventoryItem[] GetItems(InventoryType inventoryType)
     {
-        InventoryContainer* inventory1Container = inventoryManager->GetInventoryContainer(inventoryType);
-        InventoryItem* inventoryitem = inventory1Container->Items;
+        InventoryContainer* inventoryContainer = inventoryManager->GetInventoryContainer(inventoryType);
+        InventoryItem* inventoryitem = inventoryContainer->Items;
 
         InventoryItem[] items = new InventoryItem[inventorySize];
 
