@@ -21,26 +21,26 @@ class PluginUI : IDisposable
     private bool visible = false;
     public bool Visible
     {
-        get { return this.visible; }
-        set { this.visible = value; }
+        get { return visible; }
+        set { visible = value; }
     }
 
     private bool settingsVisible = false;
     public bool SettingsVisible
     {
-        get { return this.settingsVisible; }
-        set { this.settingsVisible = value; }
+        get { return settingsVisible; }
+        set { settingsVisible = value; }
     }
 
     private bool retainerScanActive = false;
     public bool RetainerScanActive
     {
-        get { return this.retainerScanActive; }
-        set { this.retainerScanActive = value; }
+        get { return retainerScanActive; }
+        set { retainerScanActive = value; }
     }
-
+    
     private readonly Plugin plugin;
-
+    
     private string[] inventoryIDs = Array.Empty<string>();
     private Models.Item[] items = Array.Empty<Models.Item>();
 
@@ -51,13 +51,15 @@ class PluginUI : IDisposable
     private WeaponJob selectedJob;
 
     private ItemInventory selectedRetainer;
-
+    
     public PluginUI(Plugin plugin)
     {
         this.plugin = plugin;
+        
         commonBase = new();
         selectedJob = EnumHelper.GetWeaponJob(plugin.ClientState.LocalPlayer?.ClassJob.GetWithLanguage(plugin.ClientState.ClientLanguage));
         selectedRetainer = ItemInventory.Retainer1;
+        
     }
 
     public void Dispose()
@@ -86,8 +88,9 @@ class PluginUI : IDisposable
 
         ImGui.SetNextWindowSize(new Vector2(800, 600), ImGuiCond.FirstUseEver);
         ImGui.SetNextWindowSizeConstraints(new Vector2(800, 600), new Vector2(float.MaxValue, float.MaxValue));
-        if (ImGui.Begin("Relic Tracker Plugin", ref this.visible, ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+        if (ImGui.Begin("Relic Tracker Plugin", ref visible, ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
+            
             if (ImGui.BeginMenuBar())
             {
                 ImGui.MenuItem("Items");
@@ -125,11 +128,11 @@ class PluginUI : IDisposable
             {
                 ImGui.Text(inventory1Name);
             }
-
+            
         }
         ImGui.End();
     }
-
+    
     public void DrawSettingsWindow()
     {
         if (!SettingsVisible)
@@ -297,23 +300,25 @@ class PluginUI : IDisposable
                 if (completed)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Header, 0xFF1DB000);
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0xFF1CD000);
                 }
                 if (weaponQuestEnum != WeaponQuest.Unknown && ImGui.CollapsingHeader($"{GetWeaponQuestName(weaponQuest, selectedJob)}"))
                 {
                     ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(5, 15));
-                    if (ImGui.Button("Open Quest"))
+                    uint? questId = GetQuestId(weaponQuest, selectedJob);
+                    if (ImGui.Button("Open Quest (" + questId + ")"))
                     {
                         Quest? quest = GetQuest(weaponQuest, selectedJob);
                         if (quest != null)
                         {
-                            if (uint.TryParse(quest.Id, out uint questId))
+                            if (questId != null)
                             {
-                                commonBase.Functions.Journal.OpenQuest(questId);
+                                commonBase.Functions.Journal.OpenQuest((uint)questId);
                             }
                         }
                     }
                     ImGui.SameLine();
-                    if (ImGui.Button("Locate Quest"))
+                    if (ImGui.Button("Locate Quest (" + questId + ")"))
                     {
                         unsafe
                         {
@@ -341,15 +346,18 @@ class PluginUI : IDisposable
                             {
                                 plugin.Configuration.CompletedQuestIds.Add((uint)id);
                             }
+                            plugin.Configuration.Save();
                         }
                     }
                     ImGui.PopStyleVar(1);
                 }
                 if (completed)
                 {
-                    ImGui.PopStyleColor(1);
+                    ImGui.PopStyleColor(2);
                 }
             }
+
+            ImGui.Separator();
 
             if (ImGui.Button($"Set {EnumHelper.GetAttribute<WeaponStepNameAttribute>(selectedStep)?.Value ?? "Unknown"} complete"))
             {

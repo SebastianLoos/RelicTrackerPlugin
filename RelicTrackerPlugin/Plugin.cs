@@ -53,7 +53,7 @@ public sealed class Plugin : IDalamudPlugin
 
         CommandManager.AddHandler(commandName, new CommandInfo(OnCommand)
         {
-            HelpMessage = "A useful message to display in /xlhelp"
+            HelpMessage = "Test!"
         });
 
         PluginInterface.UiBuilder.Draw += DrawUI;
