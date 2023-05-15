@@ -3,14 +3,14 @@
   <PropertyGroup>
     <Authors></Authors>
     <Company></Company>
-    <Version>0.0.0.3</Version>
+    <Version>0.0.0.4</Version>
     <Description>A plugin for tracking the progress of FFXVI relic weapons.</Description>
     <Copyright></Copyright>
     <PackageProjectUrl>https://github.com/goatcorp/SamplePlugin</PackageProjectUrl>
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <Platforms>x64</Platforms>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
@@ -31,8 +31,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DalamudPackager" Version="2.1.7" />
-    <PackageReference Include="XivCommon" Version="5.0.0" />
+    <PackageReference Include="DalamudPackager" Version="2.1.11" />
+    <PackageReference Include="XivCommon" Version="6.0.2" />
     <Reference Include="FFXIVClientStructs">
       <HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
       <Private>false</Private>

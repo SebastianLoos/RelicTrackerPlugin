@@ -306,7 +306,10 @@ class PluginUI : IDisposable
                         Quest? quest = GetQuest(weaponQuest, selectedJob);
                         if (quest != null)
                         {
-                            commonBase.Functions.Journal.OpenQuest(quest);
+                            if (uint.TryParse(quest.Id, out uint questId))
+                            {
+                                commonBase.Functions.Journal.OpenQuest(questId);
+                            }
                         }
                     }
                     ImGui.SameLine();
