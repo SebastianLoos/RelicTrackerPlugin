@@ -15,4 +15,6 @@ internal class Item
     public string Name { get; set; } = string.Empty;
 
     public long Quantity { get; set; }
+
+    public long NeededQuantity { get; set; }
 }

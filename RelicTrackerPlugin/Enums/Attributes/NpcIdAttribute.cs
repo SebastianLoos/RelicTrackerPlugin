@@ -7,15 +7,17 @@ using System.Threading.Tasks;
 namespace RelicTrackerPlugin.Enums.Attributes;
 
 [AttributeUsage(AttributeTargets.Field)]
-internal class WeaponQuestAttribute : Attribute
+internal class NpcIdAttribute : Attribute
 {
     public uint Value { get; }
 
-    public WeaponQuestStep[] Steps { get; }
-
-    public WeaponQuestAttribute(uint value, WeaponQuestStep[] steps)
+    public NpcIdAttribute(uint value)
     {
         Value = value;
-        Steps = steps;
+    }
+
+    public override string ToString()
+    {
+        return Value.ToString();
     }
 }

@@ -2,6 +2,9 @@
 
 namespace RelicTrackerPlugin.Enums;
 
+/// <summary>
+/// Represents a category (series) of a relic weapon.
+/// </summary>
 internal enum WeaponCategory
 {
     [WeaponCategoryName("Zodiac Weapons (50)"), WeaponCategoryJobs(new WeaponJob[] {WeaponJob.PLD, WeaponJob.PLD_OH, WeaponJob.WAR, WeaponJob.WHM, 
@@ -14,6 +17,9 @@ internal enum WeaponCategory
     [WeaponCategoryName("Item Overview")]ItemOverview
 }
 
+/// <summary>
+/// Represents a step of one category of relic weapons.
+/// </summary>
 internal enum WeaponStep
 {
     [WeaponStepName("Relic"), WeaponSubSteps(new WeaponSubStep[] { WeaponSubStep.RelicWeaponsmithLegend, WeaponSubStep.RelicRelicReborn })]Relic,
@@ -29,10 +35,10 @@ internal enum WeaponStep
 
 internal enum WeaponSubStep
 {
-    [WeaponSubStepQuest(WeaponQuest.RelicWeaponsmithLegend)]RelicWeaponsmithLegend,
-    [WeaponSubStepQuest(WeaponQuest.RelicRelicReborn)]RelicRelicReborn,
+    [WeaponSubStepQuest(WeaponQuestSet.RelicWeaponsmithLegend)]RelicWeaponsmithLegend,
+    [WeaponSubStepQuest(WeaponQuestSet.RelicRelicReborn)]RelicRelicReborn,
     [WeaponSubStepItems(new WeaponItem[] { WeaponItem.ThavnairianMist }, new int[] { 3 })]Zenith,
-    [WeaponSubStepQuest(WeaponQuest.AtmaUpInArms)]AtmaUpInArms
+    [WeaponSubStepQuest(WeaponQuestSet.AtmaUpInArms)]AtmaUpInArms
 }
 
 internal enum WeaponRelic
@@ -56,12 +62,54 @@ internal enum WeaponQuestType
     JobSpecific
 }
 
+internal enum WeaponQuestSet
+{
+    Unknown,
+    [WeaponQuestSet(new WeaponQuest[] { WeaponQuest.RelicWeaponsmithLegend }, WeaponQuestType.OneTime)] RelicWeaponsmithLegend,
+    [WeaponQuestSet(new WeaponQuest[] { 0, WeaponQuest.RelicRelicRebornPLD, WeaponQuest.RelicRelicRebornPLD, WeaponQuest.RelicRelicRebornWAR, 0, 0, WeaponQuest.RelicRelicRebornWHM, WeaponQuest.RelicRelicRebornSCH, 0, 0, WeaponQuest.RelicRelicRebornMNK, WeaponQuest.RelicRelicRebornDRG, WeaponQuest.RelicRelicRebornNIN, 0, 0, WeaponQuest.RelicRelicRebornBRD, 0, 0, WeaponQuest.RelicRelicRebornBLM, WeaponQuest.RelicRelicRebornSMN, 0, 0 }, WeaponQuestType.JobSpecific)] RelicRelicReborn,
+    [WeaponQuestSet(new WeaponQuest[] { WeaponQuest.AtmaUpInArms }, WeaponQuestType.OneTime)] AtmaUpInArms
+}
+
 internal enum WeaponQuest
 {
     Unknown,
-    [WeaponQuest(new uint[] { 66241 }, WeaponQuestType.OneTime)]RelicWeaponsmithLegend,
-    [WeaponQuest(new uint[] { 0, 66656, 66656, 66655, 0, 0, 66660, 66663, 0, 0, 66657, 66658, 67115, 0, 0, 66661, 0, 0, 66659, 66662, 0, 0 }, WeaponQuestType.JobSpecific)]RelicRelicReborn,
-    [WeaponQuest(new uint[] { 66971 }, WeaponQuestType.OneTime)] AtmaUpInArms
+    [WeaponQuest(66241, new WeaponQuestStep[] { })] RelicWeaponsmithLegend,
+    [WeaponQuest(66656, new WeaponQuestStep[] { WeaponQuestStep.RelicRelicRebornPLDBrokenWeapon, WeaponQuestStep.RelicRelicRebornPLDClassWeapon, WeaponQuestStep.RelicRelicRebornPLDOil })] RelicRelicRebornPLD,
+    [WeaponQuest(66655, new WeaponQuestStep[] { WeaponQuestStep.RelicRelicRebornWARClassWeapon })] RelicRelicRebornWAR,
+    [WeaponQuest(66660, new WeaponQuestStep[] { WeaponQuestStep.RelicRelicRebornWHMClassWeapon })] RelicRelicRebornWHM,
+    [WeaponQuest(66663, new WeaponQuestStep[] { WeaponQuestStep.RelicRelicRebornSCHClassWeapon })] RelicRelicRebornSCH,
+    [WeaponQuest(66657, new WeaponQuestStep[] { WeaponQuestStep.RelicRelicRebornMNKClassWeapon })] RelicRelicRebornMNK,
+    [WeaponQuest(66658, new WeaponQuestStep[] { WeaponQuestStep.RelicRelicRebornDRGClassWeapon })] RelicRelicRebornDRG,
+    [WeaponQuest(67115, new WeaponQuestStep[] { WeaponQuestStep.RelicRelicRebornNINClassWeapon })] RelicRelicRebornNIN,
+    [WeaponQuest(66661, new WeaponQuestStep[] { WeaponQuestStep.RelicRelicRebornBRDClassWeapon })] RelicRelicRebornBRD,
+    [WeaponQuest(66659, new WeaponQuestStep[] { WeaponQuestStep.RelicRelicRebornBLMClassWeapon })] RelicRelicRebornBLM,
+    [WeaponQuest(66662, new WeaponQuestStep[] { WeaponQuestStep.RelicRelicRebornSMNClassWeapon })] RelicRelicRebornSMN,
+    [WeaponQuest(66971, new WeaponQuestStep[] { })] AtmaUpInArms
+}
+
+internal enum WeaponQuestStepType
+{
+    Unknown = 0,
+    NPC = 1,
+    Item = 2,
+    Location = 3
+}
+
+internal enum WeaponQuestStep
+{
+    Unknown,
+    [WeaponQuestLocation(23, 30, 19)] RelicRelicRebornPLDBrokenWeapon,
+    [WeaponQuestItems(new WeaponItem[] { WeaponItem.AeolianScimitar, WeaponItem.Battledance3 }, new int[] { 1, 2 })] RelicRelicRebornPLDClassWeapon,
+    [WeaponQuestItems(new WeaponItem[] { WeaponItem.BarbariansBardiche, WeaponItem.Battledance3 }, new int[] { 1, 2 })] RelicRelicRebornWARClassWeapon,
+    [WeaponQuestItems(new WeaponItem[] { WeaponItem.ChampionsLance, WeaponItem.SavageAim3 }, new int[] { 1, 2 })] RelicRelicRebornDRGClassWeapon,
+    [WeaponQuestItems(new WeaponItem[] { WeaponItem.WildlingsCesti, WeaponItem.SavageAim3 }, new int[] { 1, 2 })] RelicRelicRebornMNKClassWeapon,
+    [WeaponQuestItems(new WeaponItem[] { WeaponItem.VampersKnives, WeaponItem.HeavensEye3 }, new int[] { 1, 2 })] RelicRelicRebornNINClassWeapon,
+    [WeaponQuestItems(new WeaponItem[] { WeaponItem.LongarmsCompositeBow, WeaponItem.HeavensEye3 }, new int[] { 1, 2 })] RelicRelicRebornBRDClassWeapon,
+    [WeaponQuestItems(new WeaponItem[] { WeaponItem.SanguineScepter, WeaponItem.SavageMight3 }, new int[] { 1, 2 })] RelicRelicRebornBLMClassWeapon,
+    [WeaponQuestItems(new WeaponItem[] { WeaponItem.EruditesPicatrixOfCasting, WeaponItem.SavageMight3 }, new int[] { 1, 2 })] RelicRelicRebornSMNClassWeapon,
+    [WeaponQuestItems(new WeaponItem[] { WeaponItem.MadmansWhisperingRod, WeaponItem.Quicktounge3 }, new int[] { 1, 2 })] RelicRelicRebornWHMClassWeapon,
+    [WeaponQuestItems(new WeaponItem[] { WeaponItem.EruditesPicatrixOfHealing, WeaponItem.Quicktounge3 }, new int[] { 1, 2 })] RelicRelicRebornSCHClassWeapon,
+    [WeaponQuestItems(new WeaponItem[] { WeaponItem.RadzAtHanQuenchingOil }, new int[] { 1 })] RelicRelicRebornPLDOil
 }
 
 internal enum WeaponJob

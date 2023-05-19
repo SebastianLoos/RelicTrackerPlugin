@@ -14,6 +14,8 @@ public class Configuration : IPluginConfiguration
 
     public List<uint> CompletedQuestIds { get; set; } = new();
 
+    public List<Tuple<int, int>> CompletedWeaponSubSteps { get; set; } = new();
+
     public bool SomePropertyToBeSavedAndWithADefault { get; set; } = true;
 
     // the below exist just to make saving less cumbersome

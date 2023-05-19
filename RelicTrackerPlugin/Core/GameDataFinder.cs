@@ -1,5 +1,6 @@
 ﻿using Dalamud;
 using Dalamud.Data;
+using Lumina.Data.Files;
 using Lumina.Excel.GeneratedSheets;
 using System.Linq;
 
@@ -14,6 +15,16 @@ internal class GameDataFinder
     {
         this.dataManager = dataManager;
         this.clientLanguage = clientLanguage;
+    }
+
+    public TexFile? GetIcon(uint iconId)
+    {
+        return dataManager.GetIcon(iconId);
+    }
+
+    public Item? GetItem(uint itemId)
+    {
+        return dataManager.GetExcelSheet<Item>(clientLanguage)?.FirstOrDefault(x => x.RowId == itemId);
     }
 
     public string GetItemName(uint itemId)
@@ -34,5 +45,10 @@ internal class GameDataFinder
     public Level? GetQuestLocation(uint questId)
     {
         return dataManager.GetExcelSheet<Quest>(clientLanguage)?.FirstOrDefault(x => x.RowId == questId)?.IssuerLocation.Value;
+    }
+
+    public Map? GetMap(uint mapId)
+    {
+        return dataManager.GetExcelSheet<Map>(clientLanguage)?.FirstOrDefault(x => x.RowId == mapId);
     }
 }

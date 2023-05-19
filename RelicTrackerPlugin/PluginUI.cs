@@ -204,10 +204,6 @@ class PluginUI : IDisposable
         ImGui.BeginChild("scrolling", new Vector2(0, 400), true, ImGuiWindowFlags.HorizontalScrollbar);
         ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, 5));
 
-        if (ImGui.CollapsingHeader("Zodiac Weapon"))
-        {
-            ImGui.Text("Bla");
-        }
         foreach (var item in items)
         {
             ImGui.Text($"{item.Name} x{item.Quantity}");
@@ -293,22 +289,24 @@ class PluginUI : IDisposable
                     }
                 }
 
-                WeaponQuest weaponQuestEnum = EnumHelper.GetAttribute<WeaponSubStepQuestAttribute>(subSteps[j])?.Value ?? WeaponQuest.Unknown;
-                WeaponQuestAttribute? weaponQuest = EnumHelper.GetAttribute<WeaponQuestAttribute>(weaponQuestEnum);
+                WeaponQuestSet weaponQuestSetEnum = EnumHelper.GetAttribute<WeaponSubStepQuestAttribute>(subSteps[j])?.Value ?? WeaponQuestSet.Unknown;
+                WeaponQuestSetAttribute? weaponQuestSet = EnumHelper.GetAttribute<WeaponQuestSetAttribute>(weaponQuestSetEnum);
+                WeaponQuest? weaponQuestEnum = GetWeaponQuest(weaponQuestSet, selectedJob);
+                WeaponQuestAttribute? weaponQuest = EnumHelper.GetAttribute<WeaponQuestAttribute>(weaponQuestEnum ?? WeaponQuest.Unknown);
 
-                bool completed = plugin.Configuration.IsQuestCompleted(GetQuestId(weaponQuest, selectedJob));
-                if (completed)
+                bool questCompleted = plugin.Configuration.IsQuestCompleted(GetQuestId(weaponQuest));
+                if (questCompleted)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Header, 0xFF1DB000);
                     ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0xFF1CD000);
                 }
-                if (weaponQuestEnum != WeaponQuest.Unknown && ImGui.CollapsingHeader($"{GetWeaponQuestName(weaponQuest, selectedJob)}"))
+                if (weaponQuestSetEnum != WeaponQuestSet.Unknown && ImGui.CollapsingHeader($"{GetWeaponQuestName(weaponQuest)}"))
                 {
                     ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(5, 15));
-                    uint? questId = GetQuestId(weaponQuest, selectedJob);
+                    uint? questId = GetQuestId(weaponQuest);
                     if (ImGui.Button("Open Quest (" + questId + ")"))
                     {
-                        Quest? quest = GetQuest(weaponQuest, selectedJob);
+                        Quest? quest = GetQuest(weaponQuest);
                         if (quest != null)
                         {
                             if (questId != null)
@@ -322,7 +320,7 @@ class PluginUI : IDisposable
                     {
                         unsafe
                         {
-                            Quest? quest = GetQuest(weaponQuest, selectedJob);
+                            Quest? quest = GetQuest(weaponQuest);
                             Level? questLocation = quest?.IssuerLocation.Value;
                             if (questLocation != null)
                             {
@@ -333,12 +331,12 @@ class PluginUI : IDisposable
                         }
                     }
                     ImGui.SameLine();
-                    if (ImGui.Button(completed ? $"Mark Step {j} incomplete" : $"Mark Step {j} complete"))
+                    if (ImGui.Button(questCompleted ? $"Mark Step {j} incomplete" : $"Mark Step {j} complete"))
                     {
-                        uint? id = GetQuestId(weaponQuest, selectedJob);
+                        uint? id = GetQuestId(weaponQuest);
                         if (id != null)
                         {
-                            if (completed)
+                            if (questCompleted)
                             {
                                 plugin.Configuration.CompletedQuestIds.Remove((uint)id);
                             }
@@ -350,8 +348,44 @@ class PluginUI : IDisposable
                         }
                     }
                     ImGui.PopStyleVar(1);
+                    
+                    if (weaponQuest != null)
+                    {
+                        for (int i = 0; i < weaponQuest?.Steps.Length; i++)
+                        {
+                            WeaponQuestLocationAttribute? weaponQuestLocation = EnumHelper.GetAttribute<WeaponQuestLocationAttribute>(weaponQuest.Steps[i]);
+                            if (weaponQuestLocation != null)
+                            {
+                                ImGui.Text($"Step {i+1}: Go to location {weaponQuestLocation.Value}");
+                                if (ImGui.Button("Open Map"))
+                                {
+                                    unsafe
+                                    {
+                                        Map? location = plugin.GameDataFinder.GetMap(weaponQuestLocation.Value);
+                                        AgentMap* map = AgentMap.Instance();
+                                        map->SetFlagMapMarker(location?.TerritoryType.Value?.RowId ?? 0, location?.RowId ?? 0, weaponQuestLocation.PositionX, weaponQuestLocation.PositionY);
+                                        map->OpenMapByMapId(location?.RowId ?? 0);
+                                    }
+                                }
+                            }
+
+                            WeaponQuestItemsAttribute? weaponQuestItems = EnumHelper.GetAttribute<WeaponQuestItemsAttribute>(weaponQuest.Steps[i]);
+                            if (weaponQuestItems != null)
+                            {
+                                ImGui.Text($"Step {i + 1}: Get the following items");
+                                if (ImGui.CollapsingHeader($"{weaponQuestItems.Values.Length} required items"))
+                                {
+                                    for (int k = 0; k < weaponQuestItems.Values.Length; k++)
+                                    {
+                                        ImGui.Text($"{plugin.GameDataFinder.GetItemName(EnumHelper.GetAttribute<WeaponItemIdAttribute>(weaponQuestItems.Values[k])?.Value ?? 0)} x{(weaponQuestItems.Amounts.Length - 1 >= k ? weaponQuestItems.Amounts[k] : 0)}");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
                 }
-                if (completed)
+                if (questCompleted)
                 {
                     ImGui.PopStyleColor(2);
                 }
@@ -367,45 +401,44 @@ class PluginUI : IDisposable
         ImGui.EndChild();
     }
 
-    private uint? GetQuestId(WeaponQuestAttribute? weaponQuestAttribute, WeaponJob weaponJob)
+    private static WeaponQuest? GetWeaponQuest(WeaponQuestSetAttribute? weaponQuestSetAttribute, WeaponJob weaponJob)
+    {
+        if (weaponQuestSetAttribute == null)
+        {
+            return null;
+        }
+        return weaponQuestSetAttribute.QuestType switch
+        {
+            WeaponQuestType.OneTime => weaponQuestSetAttribute.Values[0],
+            WeaponQuestType.JobSpecific => weaponQuestSetAttribute.Values[(int)weaponJob],
+            _ => null
+        };
+    }
+
+    private static uint? GetQuestId(WeaponQuestAttribute? weaponQuestAttribute)
     {
         if (weaponQuestAttribute == null)
         {
             return null;
         }
-        return weaponQuestAttribute.QuestType switch
-        {
-            WeaponQuestType.OneTime => weaponQuestAttribute.Values[0],
-            WeaponQuestType.JobSpecific => weaponQuestAttribute.Values[(int)weaponJob],
-            _ => null
-        };
+        return weaponQuestAttribute.Value;
     }
 
-    private string GetWeaponQuestName(WeaponQuestAttribute? weaponQuestAttribute, WeaponJob weaponJob)
+    private string GetWeaponQuestName(WeaponQuestAttribute? weaponQuestAttribute)
     {
         if (weaponQuestAttribute == null)
         {
             return string.Empty;
         }
-        return weaponQuestAttribute.QuestType switch
-        {
-            WeaponQuestType.OneTime => plugin.QuestFinder.GetQuest(weaponQuestAttribute.Values[0])?.Name ?? string.Empty,
-            WeaponQuestType.JobSpecific => plugin.QuestFinder.GetQuest(weaponQuestAttribute.Values[(int)weaponJob])?.Name ?? string.Empty,
-            _ => string.Empty
-        };
+        return plugin.QuestFinder.GetQuest(weaponQuestAttribute.Value)?.Name ?? string.Empty;
     }
 
-    private Quest? GetQuest(WeaponQuestAttribute? weaponQuestAttribute, WeaponJob weaponJob)
+    private Quest? GetQuest(WeaponQuestAttribute? weaponQuestAttribute)
     {
         if (weaponQuestAttribute == null)
         {
             return null;
         }
-        return weaponQuestAttribute.QuestType switch
-        {
-            WeaponQuestType.OneTime => plugin.QuestFinder.GetRawQuest(weaponQuestAttribute.Values[0]),
-            WeaponQuestType.JobSpecific => plugin.QuestFinder.GetRawQuest(weaponQuestAttribute.Values[(int)weaponJob]),
-            _ => null
-        };
+        return plugin.QuestFinder.GetRawQuest(weaponQuestAttribute.Value);
     }
 }
