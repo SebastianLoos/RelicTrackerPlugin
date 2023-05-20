@@ -101,7 +101,7 @@ internal class EnumHelper
 
     private static int GetWeaponItemNeededQuantity(WeaponItem weaponItem, WeaponQuestStep weaponQuestStep)
     {
-        int index = Array.IndexOf(GetAttribute<WeaponQuestItemsAttribute>(weaponItem)?.Values ?? Array.Empty<WeaponItem>(), weaponItem);
+        int index = Array.IndexOf(GetAttribute<WeaponQuestItemsAttribute>(weaponQuestStep)?.Values ?? Array.Empty<WeaponItem>(), weaponItem);
         if (index < 0)
         {
             return 0;

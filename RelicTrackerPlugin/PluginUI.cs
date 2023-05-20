@@ -206,7 +206,7 @@ class PluginUI : IDisposable
 
         foreach (var item in items)
         {
-            ImGui.Text($"{item.Name} x{item.Quantity}");
+            ImGui.Text($"{item.Name} x{item.Quantity} of {item.NeededQuantity}");
         }
         ImGui.EndChild();
 

@@ -55,7 +55,7 @@ internal class ItemFinder
                 InventoryType = inventory,
                 Name = nameFinder.GetItemName(x.Key),
                 Quantity = x.Sum(y => y.Quantity),
-                NeededQuantity = weaponItemQuantities.FirstOrDefault(x => )
+                NeededQuantity = weaponItemQuantities.Where(y => y.Item1 == x.Key).Sum(y => y.Item2)
             }));
         }
 
