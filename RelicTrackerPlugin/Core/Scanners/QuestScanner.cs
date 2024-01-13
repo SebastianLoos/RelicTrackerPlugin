@@ -1,8 +1,9 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+﻿using FFXIVClientStructs.FFXIV.Application.Network.WorkDefinitions;
+using FFXIVClientStructs.FFXIV.Client.Game;
+using RelicTrackerPlugin.Models;
 using System;
 using System.Linq;
 using static FFXIVClientStructs.FFXIV.Client.Game.QuestManager;
-using static FFXIVClientStructs.FFXIV.Client.Game.QuestManager.QuestListArray;
 
 namespace RelicTrackerPlugin.Core.Scanners;
 
@@ -17,15 +18,16 @@ internal unsafe class QuestScanner : IDisposable
         questManager = Instance();
     }
 
-    public Quest[] GetActiveQuest()
+    public ushort[] GetActiveQuest()
     {
-        QuestListArray questsArray = questManager->Quest;
+        int questLogLength = questManager->NormalQuestsSpan.Length;
 
-        Quest[] quests = new Quest[questLogSize];
+        ushort[] quests = new ushort[questLogSize];
 
-        for(int i = 0; i<questLogSize; i++)
+        for(int i = 0; i<questLogLength; i++)
         {
-            quests[i] = *questsArray[i];
+            QuestWork qw = questManager->NormalQuestsSpan[i];
+            quests[i] = qw.QuestId;
         }
 
         return quests.ToArray();

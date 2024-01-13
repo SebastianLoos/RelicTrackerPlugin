@@ -1,5 +1,4 @@
-﻿using Dalamud.Data;
-using Dalamud.Game.ClientState;
+﻿using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using RelicTrackerPlugin.Core.Scanners;
 using RelicTrackerPlugin.Enums;
@@ -27,7 +26,7 @@ internal class ItemFinder
 
     private readonly Tuple<uint, int>[] weaponItemQuantities = EnumHelper.GetWeaponItemNeededQuantities();
 
-    public ItemFinder(DataManager dataManager, ClientState clientState)
+    public ItemFinder(IDataManager dataManager, IClientState clientState)
     {
         nameFinder = new(dataManager, clientState.ClientLanguage);
         inventoryItemScanner = new();

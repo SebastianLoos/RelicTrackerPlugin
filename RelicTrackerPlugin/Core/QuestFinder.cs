@@ -1,5 +1,6 @@
 ﻿using Dalamud.Data;
 using Dalamud.Game.ClientState;
+using Dalamud.Plugin.Services;
 using RelicTrackerPlugin.Core.Scanners;
 using RelicTrackerPlugin.Models;
 using System.Linq;
@@ -10,7 +11,7 @@ internal class QuestFinder
     private readonly GameDataFinder gameDataFinder;
     private readonly QuestScanner questScanner;
 
-    public QuestFinder(DataManager dataManager, ClientState clientState)
+    public QuestFinder(IDataManager dataManager, IClientState clientState)
     {
         gameDataFinder = new(dataManager, clientState.ClientLanguage);
         questScanner = new();
@@ -20,8 +21,8 @@ internal class QuestFinder
     {
         return questScanner.GetActiveQuest().Select(x => new Quest()
         {
-            Id = x.QuestID,
-            Name = gameDataFinder.GetQuestName(x.QuestID)
+            Id = x,
+            Name = gameDataFinder.GetQuestName(x)
         }).ToArray();
     }
 

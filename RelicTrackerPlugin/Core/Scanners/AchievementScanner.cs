@@ -1,4 +1,5 @@
 ﻿using Dalamud.Data;
+using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +12,9 @@ namespace RelicTrackerPlugin.Core.Scanners;
 
 internal class AchievementScanner
 {
-    private DataManager dataManager;
+    private IDataManager dataManager;
 
-    public AchievementScanner(DataManager dataManager)
+    public AchievementScanner(IDataManager dataManager)
     {
         this.dataManager = dataManager;
     }

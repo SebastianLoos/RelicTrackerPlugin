@@ -1,5 +1,6 @@
 ﻿using Dalamud;
 using Dalamud.Data;
+using Dalamud.Plugin.Services;
 using Lumina.Data.Files;
 using Lumina.Excel.GeneratedSheets;
 using System.Linq;
@@ -9,9 +10,9 @@ namespace RelicTrackerPlugin.Core;
 internal class GameDataFinder
 {
     private readonly ClientLanguage clientLanguage;
-    private readonly DataManager dataManager;
+    private readonly IDataManager dataManager;
 
-    public GameDataFinder(DataManager dataManager, ClientLanguage clientLanguage)
+    public GameDataFinder(IDataManager dataManager, ClientLanguage clientLanguage)
     {
         this.dataManager = dataManager;
         this.clientLanguage = clientLanguage;
@@ -19,7 +20,7 @@ internal class GameDataFinder
 
     public TexFile? GetIcon(uint iconId)
     {
-        return dataManager.GetIcon(iconId);
+        return null;
     }
 
     public Item? GetItem(uint itemId)

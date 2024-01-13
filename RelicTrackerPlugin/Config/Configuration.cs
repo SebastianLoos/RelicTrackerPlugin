@@ -1,7 +1,9 @@
 ﻿using Dalamud.Configuration;
 using Dalamud.Plugin;
+using RelicTrackerPlugin.Enums;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RelicTrackerPlugin.Config;
 
@@ -14,7 +16,7 @@ public class Configuration : IPluginConfiguration
 
     public List<uint> CompletedQuestIds { get; set; } = new();
 
-    public List<Tuple<int, int>> CompletedWeaponSubSteps { get; set; } = new();
+    public List<ConfigurationSubStep> CompletedWeaponSubSteps { get; set; } = new();
 
     public bool SomePropertyToBeSavedAndWithADefault { get; set; } = true;
 
@@ -42,6 +44,33 @@ public class Configuration : IPluginConfiguration
         else
         {
             return CompletedQuestIds.Contains((uint)questId);
+        }
+    }
+
+    public bool IsSubStepComplete(uint weaponSubStep, uint weaponJob)
+    {
+        return CompletedWeaponSubSteps.Any(x => x.WeaponSubStep == weaponSubStep & x.WeaponJob == weaponJob);
+    }
+
+    public void AddCompletedSubStep(uint weaponSubStep, uint weaponJob)
+    {
+        ConfigurationSubStep? completedWeaponSubStep = CompletedWeaponSubSteps.FirstOrDefault(x => x.WeaponSubStep  == weaponSubStep & x.WeaponJob == weaponJob);
+        if (completedWeaponSubStep == null)
+        {
+            CompletedWeaponSubSteps.Add(new()
+            {
+                WeaponSubStep = weaponSubStep,
+                WeaponJob = weaponJob
+            });
+        }
+    }
+
+    public void RemoveCompletedSubStep(uint weaponSubStep, uint weaponJob)
+    {
+        ConfigurationSubStep? completedWeaponSubStep = CompletedWeaponSubSteps.FirstOrDefault(x => x.WeaponSubStep == weaponSubStep & x.WeaponJob == weaponJob);
+        if (completedWeaponSubStep != null)
+        {
+            CompletedWeaponSubSteps.Remove((ConfigurationSubStep)completedWeaponSubStep);
         }
     }
 }

@@ -24,7 +24,7 @@ internal enum WeaponStep
 {
     [WeaponStepName("Relic"), WeaponSubSteps(new WeaponSubStep[] { WeaponSubStep.RelicWeaponsmithLegend, WeaponSubStep.RelicRelicReborn })]Relic,
     [WeaponStepName("Zenith"), WeaponSubSteps(new WeaponSubStep[] { WeaponSubStep.Zenith })]Zenith,
-    [WeaponStepName("Atma"), WeaponSubSteps(new WeaponSubStep[] { WeaponSubStep.AtmaUpInArms })]Atma,
+    [WeaponStepName("Atma"), WeaponSubSteps(new WeaponSubStep[] { WeaponSubStep.AtmaUpInArms, WeaponSubStep.AtmaAtmas })]Atma,
     [WeaponStepName("Animus")]Animus,
     [WeaponStepName("Novus")]Novus,
     [WeaponStepName("Nexus")]Nexus,
@@ -38,7 +38,8 @@ internal enum WeaponSubStep
     [WeaponSubStepQuest(WeaponQuestSet.RelicWeaponsmithLegend)]RelicWeaponsmithLegend,
     [WeaponSubStepQuest(WeaponQuestSet.RelicRelicReborn)]RelicRelicReborn,
     [WeaponSubStepItems(new WeaponItem[] { WeaponItem.ThavnairianMist }, new int[] { 3 })]Zenith,
-    [WeaponSubStepQuest(WeaponQuestSet.AtmaUpInArms)]AtmaUpInArms
+    [WeaponSubStepQuest(WeaponQuestSet.AtmaUpInArms)]AtmaUpInArms,
+    [WeaponSubStepItems(new WeaponItem[] { WeaponItem.AtmaLion, WeaponItem.AtmaWaterBearer, WeaponItem.AtmaRam, WeaponItem.AtmaCrab, WeaponItem.AtmaFish, WeaponItem.AtmaBull, WeaponItem.AtmaScales, WeaponItem.AtmaTwins, WeaponItem.AtmaScoprion, WeaponItem.AtmaArcher, WeaponItem.AtmaGoat, WeaponItem.AtmaMaiden }, new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 })]AtmaAtmas
 }
 
 internal enum WeaponRelic

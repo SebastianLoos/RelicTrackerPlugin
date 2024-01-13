@@ -21,7 +21,19 @@ internal enum WeaponItem
     [WeaponItemId(5671)] SavageAim3,
     [WeaponItemId(5666)] HeavensEye3,
     [WeaponItemId(5676)] SavageMight3,
-    [WeaponItemId(5721)] Quicktounge3
+    [WeaponItemId(5721)] Quicktounge3,
+    [WeaponItemId(7858)] AtmaLion,
+    [WeaponItemId(7853)] AtmaWaterBearer,
+    [WeaponItemId(7856)] AtmaRam,
+    [WeaponItemId(7862)] AtmaCrab,
+    [WeaponItemId(7859)] AtmaFish,
+    [WeaponItemId(7855)] AtmaBull,
+    [WeaponItemId(7861)] AtmaScales,
+    [WeaponItemId(7857)] AtmaTwins,
+    [WeaponItemId(7852)] AtmaScoprion,
+    [WeaponItemId(7860)] AtmaArcher,
+    [WeaponItemId(7854)] AtmaGoat,
+    [WeaponItemId(7851)] AtmaMaiden
 }
 
 public enum ItemInventory

@@ -1,12 +1,10 @@
-﻿using Dalamud.Data;
-using Dalamud.Game.ClientState;
-using Dalamud.Game.Command;
+﻿using Dalamud.Plugin.Services;
 
 namespace RelicTrackerPlugin;
 public class Dalamud
 {
-    public CommandManager CommandManager { get; set; }
+    public ICommandManager CommandManager { get; set; }
 
-    public DataManager DataManager { get; set; }
-    public ClientState ClientState { get; set; }
+    public IDataManager DataManager { get; set; }
+    public IClientState ClientState { get; set; }
 }

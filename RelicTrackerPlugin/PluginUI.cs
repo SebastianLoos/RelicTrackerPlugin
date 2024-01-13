@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
+﻿using Dalamud.Plugin;
 using FFXIVClientStructs.FFXIV.Client.UI.Agent;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
@@ -9,7 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using XivCommon;
-using static FFXIVClientStructs.FFXIV.Client.Game.RetainerManager.RetainerList;
+using static Dalamud.Interface.Utility.Raii.ImRaii;
+using static FFXIVClientStructs.FFXIV.Client.Game.RetainerManager;
 
 namespace RelicTrackerPlugin;
 
@@ -52,14 +53,13 @@ class PluginUI : IDisposable
 
     private ItemInventory selectedRetainer;
     
-    public PluginUI(Plugin plugin)
+    public PluginUI(Plugin plugin, DalamudPluginInterface dalamudPluginInterface)
     {
         this.plugin = plugin;
         
-        commonBase = new();
+        commonBase = new(dalamudPluginInterface);
         selectedJob = EnumHelper.GetWeaponJob(plugin.ClientState.LocalPlayer?.ClassJob.GetWithLanguage(plugin.ClientState.ClientLanguage));
         selectedRetainer = ItemInventory.Retainer1;
-        
     }
 
     public void Dispose()
@@ -77,6 +77,7 @@ class PluginUI : IDisposable
 
         DrawMainWindow();
         DrawSettingsWindow();
+        DrawRetainerScanWindow();
     }
 
     public void DrawMainWindow()
@@ -167,21 +168,13 @@ class PluginUI : IDisposable
         if (ImGui.Begin("Scan retainer inventories", ref this.retainerScanActive,
             ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
-            
+            if (ImGui.BeginCombo("retainerselect", "Select Retainer"))
+            {
+                ImGui.Text("Test");
+            }
+            ImGui.EndCombo();
         }
         ImGui.End();
-    }
-
-    private Retainer? GetRetainer(ItemInventory retainer)
-    {
-        unsafe
-        {
-            return retainer switch
-            {
-                ItemInventory.Retainer1 => RetainerManager.Instance()->Retainer.Retainer0,
-                _ => null
-            };
-        }
     }
 
     private void DrawTabContent(WeaponCategory weaponCategory)
@@ -218,7 +211,8 @@ class PluginUI : IDisposable
         if (ImGui.Button("Scan retainers"))
         {
             selectedRetainer = ItemInventory.Retainer1;
-            RetainerScanActive = true;
+            //RetainerScanActive = true;
+            items = plugin.ItemFinder.ScanRetainer();
         }
     }
 
@@ -274,6 +268,13 @@ class PluginUI : IDisposable
 
             for (int j = 0; j < subSteps.Length; j++)
             {
+                bool stepCompleted = IsSubStepComplete(subSteps[j], selectedJob);
+                if (stepCompleted)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Header, 0xFF1DB000);
+                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0xFF1CD000);
+                }
+                
                 WeaponSubStepItemsAttribute? attribute = EnumHelper.GetAttribute<WeaponSubStepItemsAttribute>(subSteps[j]);
                 WeaponItem[] weaponItems = attribute?.Values ?? Array.Empty<WeaponItem>();
                 int[] weaponItemsAmounts = attribute?.Amounts ?? Array.Empty<int>();
@@ -286,6 +287,21 @@ class PluginUI : IDisposable
                         {
                             ImGui.Text($"{plugin.GameDataFinder.GetItemName(EnumHelper.GetAttribute<WeaponItemIdAttribute>(weaponItems[k])?.Value ?? 0)} x{(weaponItemsAmounts.Length-1 >= k ? weaponItemsAmounts[k] : 0)}");
                         }
+
+                        if (ImGui.Button(stepCompleted ? $"Mark Step {j} incomplete" : $"Mark Step {j} complete"))
+                        {
+                            if (stepCompleted)
+                            {
+                                plugin.Configuration.RemoveCompletedSubStep((uint)subSteps[j], (uint)selectedJob);
+                            }
+                            else
+                            {
+                                plugin.Configuration.AddCompletedSubStep((uint)subSteps[j], (uint)selectedJob);
+                            }
+                            plugin.Configuration.Save();
+                        }
+                        ImGui.PopStyleVar(1);
+
                     }
                 }
 
@@ -294,12 +310,6 @@ class PluginUI : IDisposable
                 WeaponQuest? weaponQuestEnum = GetWeaponQuest(weaponQuestSet, selectedJob);
                 WeaponQuestAttribute? weaponQuest = EnumHelper.GetAttribute<WeaponQuestAttribute>(weaponQuestEnum ?? WeaponQuest.Unknown);
 
-                bool questCompleted = plugin.Configuration.IsQuestCompleted(GetQuestId(weaponQuest));
-                if (questCompleted)
-                {
-                    ImGui.PushStyleColor(ImGuiCol.Header, 0xFF1DB000);
-                    ImGui.PushStyleColor(ImGuiCol.HeaderHovered, 0xFF1CD000);
-                }
                 if (weaponQuestSetEnum != WeaponQuestSet.Unknown && ImGui.CollapsingHeader($"{GetWeaponQuestName(weaponQuest)}"))
                 {
                     ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(5, 15));
@@ -331,12 +341,12 @@ class PluginUI : IDisposable
                         }
                     }
                     ImGui.SameLine();
-                    if (ImGui.Button(questCompleted ? $"Mark Step {j} incomplete" : $"Mark Step {j} complete"))
+                    if (ImGui.Button(stepCompleted ? $"Mark Step {j} incomplete" : $"Mark Step {j} complete"))
                     {
                         uint? id = GetQuestId(weaponQuest);
                         if (id != null)
                         {
-                            if (questCompleted)
+                            if (stepCompleted)
                             {
                                 plugin.Configuration.CompletedQuestIds.Remove((uint)id);
                             }
@@ -385,7 +395,7 @@ class PluginUI : IDisposable
                     }
                     
                 }
-                if (questCompleted)
+                if (stepCompleted)
                 {
                     ImGui.PopStyleColor(2);
                 }
@@ -440,5 +450,27 @@ class PluginUI : IDisposable
             return null;
         }
         return plugin.QuestFinder.GetRawQuest(weaponQuestAttribute.Value);
+    }
+
+    private bool IsSubStepComplete(WeaponSubStep subStep, WeaponJob job)
+    {
+        WeaponQuestSet? weaponQuestSetEnum = EnumHelper.GetAttribute<WeaponSubStepQuestAttribute>(subStep)?.Value;
+        WeaponSubStepItemsAttribute? weaponSubStepItemsAttribute = EnumHelper.GetAttribute<WeaponSubStepItemsAttribute>(subStep);
+        if (weaponQuestSetEnum != null) 
+        {
+            WeaponQuestSetAttribute? weaponQuestSet = EnumHelper.GetAttribute<WeaponQuestSetAttribute>(weaponQuestSetEnum);
+            WeaponQuest? weaponQuestEnum = GetWeaponQuest(weaponQuestSet, selectedJob);
+            WeaponQuestAttribute? weaponQuest = EnumHelper.GetAttribute<WeaponQuestAttribute>(weaponQuestEnum ?? WeaponQuest.Unknown);
+
+            return plugin.Configuration.IsQuestCompleted(GetQuestId(weaponQuest));
+        }
+        else if (weaponSubStepItemsAttribute != null)
+        {
+            return plugin.Configuration.IsSubStepComplete((uint)subStep, (uint)job);
+        }
+        else
+        {
+            return false;
+        }
     }
 }
